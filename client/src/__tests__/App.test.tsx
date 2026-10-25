@@ -1,7 +1,8 @@
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { App, parseRoute } from '../App';
-import { stubApi, summary, textDoc } from './fakeApi';
+import { stubApi, summary } from './fakeApi';
+import { FakeServer } from './syncServer';
 
 beforeEach(() => {
   window.location.hash = '';
@@ -42,8 +43,9 @@ describe('App shell: routing', () => {
       'GET /api/health': health,
       ...signedIn(bob),
       'GET /api/documents/d1': () => ({
-        json: { document: { ...summary({ id: 'd1', title: 'Opened' }), ownerName: 'Alice Anderson', access: 'editor', content: textDoc('Body text') } },
+        json: { document: { ...summary({ id: 'd1', title: 'Opened' }), ownerName: 'Alice Anderson', access: 'editor', content: { type: 'doc' } } },
       }),
+      'POST /api/documents/d1/sync': (body) => ({ json: new FakeServer('Body text').respond(body as never) }),
     });
     render(<App />);
     expect(await screen.findByLabelText('Document title')).toHaveValue('Opened');
@@ -107,8 +109,9 @@ describe('Simulated sign-in (UI)', () => {
       'GET /api/health': health,
       ...signedIn(),
       'GET /api/documents/d1': () => ({
-        json: { document: { ...summary({ id: 'd1', title: 'Open doc' }), ownerName: 'Alice Anderson', access: 'owner', content: textDoc('x') } },
+        json: { document: { ...summary({ id: 'd1', title: 'Open doc' }), ownerName: 'Alice Anderson', access: 'owner', content: { type: 'doc' } } },
       }),
+      'POST /api/documents/d1/sync': (body) => ({ json: new FakeServer('x').respond(body as never) }),
       'GET /api/documents/d1/shares': () => ({ json: { shares: [] } }),
       'POST /api/session': () => ({ json: { user: carol } }),
       'GET /api/documents': noDocs,

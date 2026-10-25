@@ -9,9 +9,9 @@
   },
   "scripts": {
     "dev": "concurrently -k -n server,client -c blue,green \"npm:dev:server\" \"npm:dev:client\"",
-    "dev:server": "tsx watch server/src/index.ts",
+    "dev:server": "tsx watch --no-experimental-webstorage server/src/index.ts",
     "dev:client": "vite",
-    "start": "tsx server/src/index.ts",
+    "start": "tsx --no-experimental-webstorage server/src/index.ts",
     "build": "vite build",
     "preview": "vite preview",
     "typecheck": "tsc -p tsconfig.client.json --noEmit && tsc -p tsconfig.server.json --noEmit",

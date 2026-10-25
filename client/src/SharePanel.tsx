@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 import { listShares, shareDocument, unshareDocument, type ShareRecord } from './api';
+import { Avatar } from './Avatar';
 import { useSession } from './session';
 
 /**
@@ -60,7 +61,8 @@ export function SharePanel({ docId }: { docId: string }) {
         <ul aria-label="People with access" className="share-list">
           {shares.map((s) => (
             <li key={s.userId}>
-              <span>
+              <Avatar id={s.userId} name={s.name} size={28} />
+              <span className="share-person">
                 {s.name} <span className="muted">({s.email}) · can edit</span>
               </span>
               <button
@@ -86,6 +88,7 @@ export function SharePanel({ docId }: { docId: string }) {
         </select>
         <button
           type="button"
+          className="primary"
           disabled={busy || !choice}
           onClick={async () => {
             const target = users.find((u) => u.id === choice);

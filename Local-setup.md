@@ -51,6 +51,12 @@ curl.exe -b jar.txt http://127.0.0.1:3001/api/documents
 
 (The old `x-user-id` header no longer works. Deleting `data/app.db` resets all data and signs everyone out, because the cookie-signing key lives in the database.)
 
+To put the app on the internet see `deployment_guide.md`. Short version: the backend cannot run on Vercel (it needs a long-running process and a persistent disk); the frontend can.
+
+## Notes on the design folder and fonts
+
+The `UI/` folder holds the design mockups (HTML exports and PNGs) that the interface follows. It is reference material only: it is not built, served or tested, and ESLint ignores it. The app does not download web fonts, so it works offline; machines without Inter or Newsreader show the system sans-serif and Georgia.
+
 ## Checks
 
 ```powershell

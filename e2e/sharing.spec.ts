@@ -118,23 +118,30 @@ test.describe('End-to-End: ownership and sharing between seeded users', () => {
     await expect(sharedWithMe(bob).getByRole('link', { name: title })).toBeVisible();
   });
 
-  test('[FR-3.6] when Alice revokes access Bob is refused: his open editor cannot save, and the document leaves his list and cannot be reopened', async ({ page, asUser }) => {
+  test('[FR-3.6] when Alice revokes access, the unsaved work on Bob screen is refused but kept, his editor locks, and the document leaves his list', async ({ page, asUser }) => {
     const { title, id } = await createSavedDocument(page, 'before revoke');
     await shareWith(page, 'Bob Brown');
 
     const bob = await asUser(BOB);
     await bob.goto(`/#/docs/${id}`);
     await expect(editor(bob)).toContainText('before revoke');
+    await expect(bob.getByTestId('save-status')).toHaveText('All changes saved');
+
+    // Cut Bob's connection so what he types stays unsaved while Alice removes his access.
+    await bob.route('**/api/documents/*/sync', (route) => route.abort());
     await editor(bob).click();
     await bob.keyboard.type(' bob typing');
+    await expect(bob.getByTestId('save-status')).toContainText('Save failed');
 
     await page.getByRole('button', { name: 'Remove Bob Brown' }).click();
     await expect(page.getByTestId('share-notice')).toContainText('Access removed for Bob Brown.');
     await expect(page.getByText('Only you can open this document.')).toBeVisible();
 
-    await bob.getByRole('button', { name: 'Save' }).click();
-    await expect(bob.getByTestId('save-status')).toContainText('Save failed: You do not have permission');
+    await bob.unroute('**/api/documents/*/sync'); // connection is back; his next save is refused
+    await expect(bob.getByTestId('save-status')).toContainText('Save failed: You do not have permission', { timeout: 10_000 });
     await expect(editor(bob)).toContainText('bob typing'); // his text is not silently discarded
+    await expect(editor(bob)).toHaveAttribute('contenteditable', 'false');
+    await expect(bob.getByRole('button', { name: 'Bold' })).toBeDisabled();
 
     await bob.goto('/');
     await expect(sharedWithMe(bob).getByRole('link', { name: title })).toHaveCount(0);
@@ -142,7 +149,7 @@ test.describe('End-to-End: ownership and sharing between seeded users', () => {
     await bob.reload();
     await expect(bob.getByRole('alert')).toContainText('You do not have permission');
 
-    // The owner's document is untouched by the refused save.
+    // The refused text never reached the owner's document.
     await page.reload();
     await expect(editor(page)).toContainText('before revoke');
     await expect(editor(page)).not.toContainText('bob typing');

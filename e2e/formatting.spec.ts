@@ -50,7 +50,6 @@ test.describe('End-to-End: Rich-text formatting', () => {
     await kb.press('Enter');
     await kb.type('step two');
 
-    await expect(page.getByTestId('save-status')).toHaveText('Unsaved changes');
     await saveAndWait(page);
 
     // Stored JSON (as the server holds it) contains every feature.

@@ -65,41 +65,52 @@ export function App() {
   }, []);
 
   const route = parseRoute(hash);
-  const user = session.kind === 'ready' ? session.user : null;
 
+  // Not signed in: the full-page "choose a user" screen.
+  if (session.kind === 'ready' && !session.user) {
+    return <SignInScreen users={session.users} onPick={pick} error={actionError} />;
+  }
+
+  const user = session.kind === 'ready' ? session.user : null;
   return (
-    <main>
-      <header className="row">
-        <h1>
-          <a href="#/">Ajaia Docs</a>
+    <div className="shell">
+      <header className="topbar">
+        <h1 className="brand">
+          <a href="#/">
+            <span className="brand-mark" aria-hidden="true">
+              A
+            </span>
+            Ajaia Docs
+          </a>
         </h1>
         {session.kind === 'ready' && user && (
           <UserSwitcher user={user} users={session.users} onSwitch={pick} onSignOut={leave} />
         )}
       </header>
-      {actionError && (
-        <p role="alert" className="error">
-          {actionError}
-        </p>
-      )}
-      {session.kind === 'loading' && <p>Loading…</p>}
-      {session.kind === 'error' && (
-        <p role="alert" className="error">
-          {session.message}
-        </p>
-      )}
-      {session.kind === 'ready' && !user && <SignInScreen users={session.users} onPick={pick} />}
-      {session.kind === 'ready' && user && (
-        <SessionContext.Provider value={{ user, users: session.users }}>
-          {/* Keyed by user so nothing from the previous user's view survives a switch. */}
-          {route.page === 'list' ? (
-            <DocumentList key={user.id} />
-          ) : (
-            <DocumentEditor key={`${user.id}:${route.id}`} id={route.id} />
-          )}
-        </SessionContext.Provider>
-      )}
-      <BackendStatus />
-    </main>
+      <main className="page">
+        {actionError && (
+          <p role="alert" className="error">
+            {actionError}
+          </p>
+        )}
+        {session.kind === 'loading' && <p>Loading…</p>}
+        {session.kind === 'error' && (
+          <p role="alert" className="error">
+            {session.message}
+          </p>
+        )}
+        {session.kind === 'ready' && user && (
+          <SessionContext.Provider value={{ user, users: session.users }}>
+            {/* Keyed by user so nothing from the previous user's view survives a switch. */}
+            {route.page === 'list' ? (
+              <DocumentList key={user.id} />
+            ) : (
+              <DocumentEditor key={`${user.id}:${route.id}`} id={route.id} />
+            )}
+          </SessionContext.Provider>
+        )}
+        {!(session.kind === 'ready' && !user) && <BackendStatus />}
+      </main>
+    </div>
   );
 }

@@ -193,3 +193,49 @@ Session, policy, sharing-service and sharing-API tests were written before the i
 | `e2e/documents.spec.ts`, `formatting.spec.ts`, `paste.spec.ts`, `import.spec.ts` | Modified | Use the fixture and the cookie | Header calls removed; the "other user" checks use `asUser` |
 | `README.md`, `Architecture.md`, `Local-setup.md`, `Testing-guide.md` | Modified | Document the actual Phase 5 state | Sign-in, sharing model, permission matrix, API, limitations, FR-3.x and SEC-4 mapping, manual steps |
 | `Plan.md`, `Roadmap.md` | Modified | Record verified progress | Phase 5 ticked and marked "Complete (pending owner review)"; verification, mutation results, limitations |
+
+## After Phase 5: Live editing, autosave, and the visual design (owner request)
+
+### 2026-10-25 16:20 PDT (UTC-07:00)
+
+| File | Action | Reason | Description |
+|---|---|---|---|
+| `package.json`, `package-lock.json` | Modified | Collaboration dependencies and dev scripts | Added `yjs`, `@tiptap/extension-collaboration`, `@tiptap/y-tiptap`, `@tiptap/core` (direct); `--no-experimental-webstorage` on the dev and start scripts (flag placed after `watch` after a first attempt broke the script) |
+| `shared/editorExtensions.ts` | Created | One editor schema for browser and server | StarterKit configuration moved here; `YJS_FIELD` |
+| `tsconfig.client.json`, `tsconfig.server.json` | Modified | Include `shared/` | |
+| `vitest.config.ts` | Modified | Silence a Node warning raised by Yjs | `execArgv: ['--no-experimental-webstorage']` |
+| `eslint.config.js` | Modified | The `UI/` mockup folder (vendored scripts) must not be linted | Added `UI` to ignores |
+| `server/src/db/migrations.ts` | Modified | Store merge history | Migration 003: `documents.ydoc` BLOB |
+| `server/src/collab/ydoc.ts`, `server/src/collab/base64.ts` | Created | Yjs helpers | Build, load and convert shared documents; validation of merged content; base64 helpers |
+| `server/src/services/documents.ts` | Modified | Sync and consistency | New `sync`; `saveContent` also updates the shared document when one exists; queries no longer load the blob unless needed |
+| `server/src/routes/documents.ts` | Modified | Sync route | `POST /api/documents/:id/sync` |
+| `server/src/__tests__/collabClient.ts`, `sync.service.test.ts`, `sync.api.test.ts`, `collab.integration.test.ts` | Created | Tests for live editing | 40, 8 and 7 tests plus a fake-browser helper; the integration test runs the real browser sync engine against the real server |
+| `client/src/sync/DocSync.ts` | Created | Browser sync engine | Debounced autosave, polling, retry, fatal-error handling, flush on leave |
+| `client/src/api.ts` | Modified | Sync call | `syncDocument` |
+| `client/src/editor/RichTextEditor.tsx`, `client/src/editor/extensions.ts` | Modified | Collaborative editor | Bound to the shared document; read-only while loading or after access is lost |
+| `client/src/DocumentEditor.tsx` | Rewritten | Autosave UI | Status text for loading, unsaved, saving, saved and failed; Save button syncs now; remote rename; unload warning |
+| `client/src/__tests__/DocSync.test.ts`, `syncServer.ts` | Created | Sync engine tests | 24 tests with fake timers and an in-memory fake server |
+| `client/src/__tests__/RichTextEditor.test.tsx`, `DocumentEditor.test.tsx`, `App.test.tsx`, `editorContract.test.ts` | Rewritten or modified | Editor now reads the shared document | New tests for opening without writing, cursor stability, access lock, autosave states; editor output validated with the server's own conversion |
+| `e2e/collaboration.spec.ts` | Created | Real two- and three-browser tests | 12 tests |
+| `e2e/documents.spec.ts`, `formatting.spec.ts`, `paste.spec.ts`, `sharing.spec.ts` | Modified | Autosave replaced manual-save assumptions | Removed the transient "Unsaved changes" assertion; revoked-editor test now blocks the network first |
+| `client/src/Avatar.tsx` | Created | Design: initials avatars | Colours per seeded user |
+| `client/src/index.css` | Rewritten | Design from `/UI` | Tokens, sign-in split screen, top bar, lists, editor paper and toolbar, sharing panel |
+| `client/src/App.tsx`, `UserSwitcher.tsx`, `DocumentList.tsx`, `SharePanel.tsx` | Modified | Design layout | App shell and full-page sign-in; avatars; primary buttons. All labels, roles and test ids unchanged |
+| `README.md`, `Architecture.md`, `Testing-guide.md`, `Local-setup.md`, `Plan.md`, `Roadmap.md` | Modified | Document the actual state | Live editing design and limits, FR-5.x mapping, UI notes, what was not verified |
+
+Not changed by me: the `UI/` folder (owner-supplied design mockups).
+
+## Phase 8: Final documentation and verification
+
+### 2026-10-25 16:45 PDT (UTC-07:00)
+
+Phases 6 and 7 were skipped by owner decision (time constraint).
+
+| File | Action | Reason | Description |
+|---|---|---|---|
+| `server/src/__tests__/sync.service.test.ts` | Modified | Mutation check showed that a shared document with no blocks was untested | Two tests added: a document stored as `{type: 'doc'}` or with an empty content list opens as exactly one empty paragraph for every client |
+| `deployment_guide.md` | Created | Owner asked whether Vercel plus a backend host would work | Answers: frontend on Vercel works; backend cannot run on Vercel; Render works but the free plan loses all data; the Vercel rewrite is required for the cookie; exact settings; checks; options; limits. Marked untested. Platform facts checked against the providers' documentation |
+| `Plan.md` | Modified | Final status | Phases 6 and 7 marked "Skipped (time constraint)" (status list extended on owner instruction); Phase 8 marked "Complete (with documented gaps)"; documentation and acceptance boxes ticked where evidenced, "local setup without paid services" left unticked with the reason |
+| `Roadmap.md` | Modified | Final acceptance | Verdict, commands and results, section 8 reconciliation, requirement coverage, Phase 6 and 7 coverage tables, known defects, remaining work and estimate |
+| `Testing-guide.md` | Modified | Final mapping | Added the edge-case row and the two skipped-phase gap rows |
+| `README.md`, `Local-setup.md`, `Architecture.md` | Modified | Point to the deployment guide | Link and a short Deployment section |

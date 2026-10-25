@@ -62,7 +62,6 @@ test.describe('End-to-End: Pasting rich text', () => {
   test('[FR-1.7][FR-4.1] pasted formatting can be saved and is restored after a reload', async ({ page }) => {
     await newDocument(page);
     await pasteHtml(page, SEMANTIC);
-    await expect(page.getByTestId('save-status')).toHaveText('Unsaved changes');
     await page.getByRole('button', { name: 'Save' }).click();
     await expect(page.getByTestId('save-status')).toHaveText('All changes saved');
 

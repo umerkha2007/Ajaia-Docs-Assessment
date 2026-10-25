@@ -5,6 +5,8 @@ export default defineConfig({
   test: {
     globals: true,
     reporters: ['verbose'],
+    // Yjs probes localStorage on import; Node 25+ prints an experimental-feature warning for that.
+    execArgv: ['--no-experimental-webstorage'],
     projects: [
       {
         test: {

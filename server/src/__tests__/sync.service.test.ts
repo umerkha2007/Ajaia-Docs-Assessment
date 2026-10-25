@@ -70,6 +70,22 @@ describe('Collaboration: first sync and loading', () => {
     expect(b.lines()).toEqual(['']);
   });
 
+  it.each([
+    ['no content key', { type: 'doc' }],
+    ['an empty content list', { type: 'doc', content: [] }],
+  ])('[FR-5.1] a document stored with no blocks (%s) opens as exactly one empty paragraph for every client, not one each', (_l, empty) => {
+    const bare = svc.create(ALICE, { title: 'Bare' }).id;
+    svc.saveContent(ALICE, bare, empty);
+    svc.share(ALICE, bare, BOB);
+    const a = new FakeClient(svc, ALICE, bare);
+    const b = new FakeClient(svc, BOB, bare);
+    a.sync();
+    b.sync();
+    settle(a, b);
+    expect(a.lines()).toEqual(['']);
+    expect(b.lines()).toEqual(['']);
+  });
+
   it('[FR-5.1] a poll with nothing to send or receive changes nothing, including the document\'s update time', () => {
     const a = client(ALICE);
     a.sync();

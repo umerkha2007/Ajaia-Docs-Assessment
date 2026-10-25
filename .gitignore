@@ -6,3 +6,5 @@ test-results/
 playwright-report/
 *.log
 .env
+deployment_guide.md
+LLM_understanding.md

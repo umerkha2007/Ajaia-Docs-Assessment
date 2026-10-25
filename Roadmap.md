@@ -1,6 +1,6 @@
 # Roadmap
 
-Last updated: 2026-10-25 15:55 PDT (UTC-07:00). Only items with observed evidence are marked verified.
+Last updated: 2026-10-25 16:45 PDT (UTC-07:00). Only items with observed evidence are marked verified.
 
 ## Phase status
 
@@ -11,9 +11,9 @@ Last updated: 2026-10-25 15:55 PDT (UTC-07:00). Only items with observed evidenc
 | 3. Rich-text editor | Complete (pending owner review) | See "Phase 3 verification" |
 | 4. File upload (.txt, .md) | Complete (pending owner review) | See "Phase 4 verification" |
 | 5. Seeded users and sharing | Complete (pending owner review) | See "Phase 5 verification" |
-| 6. Error handling and test completion | Not started | |
-| 7. Integration and usability | Not started | |
-| 8. Documentation and final verification | Not started | |
+| 6. Error handling and test completion | Skipped (time constraint) | Owner decision. See "Phases 6 and 7: what was and was not covered" |
+| 7. Integration and usability | Skipped (time constraint) | Owner decision. See "Phases 6 and 7: what was and was not covered" |
+| 8. Documentation and final verification | Complete (with documented gaps) | See "Final acceptance (Phase 8)" |
 
 ## Phase 1 verification (commands actually run, 2026-10-25, Windows 11, Node 26.8.2, npm 12.0.2)
 
@@ -28,6 +28,110 @@ Last updated: 2026-10-25 15:55 PDT (UTC-07:00). Only items with observed evidenc
 Not verified: `npm start` was not run on its own; the production build is client-only and is not served by the backend; behaviour on a Node version other than 26.8.2; macOS/Linux.
 
 Issues found and fixed during Phase 1: ESLint `preserve-caught-error` in `migrate.ts` (added `cause`); the first E2E run timed out because Vite was not reachable on `127.0.0.1` (fixed by binding `127.0.0.1` in `vite.config.ts`).
+
+## Final acceptance (Phase 8), 2026-10-25 16:45 PDT (UTC-07:00)
+
+**Verdict.** The core product works and has been verified as described below. **I am not declaring the MVP complete**, because `Agents.md` section 8 forbids that while a mandatory item is unverified, and Phase 6 (database-failure handling) was skipped. What is true: every functional requirement in `Requirements.md` is implemented and has automated tests that pass; the remaining gaps are listed explicitly.
+
+### Commands run for this acceptance (all on Windows 11, Node 26.8.2)
+
+| Command | Result |
+|---|---|
+| `npm run typecheck` | 0 errors |
+| `npm run lint` | 0 problems (the `UI/` mockup folder is excluded) |
+| `npm test` | 27 files, **490 tests passed**, 0 failed, 0 skipped (server 352, client 138) |
+| `npm run build` | Succeeded |
+| `npm run test:e2e` (Chromium) | **51 passed** on each of three consecutive runs. One earlier run in the same session reported 50 passed and 1 failed (a text-content assertion); I did not capture which test, it did not recur in the three following runs, and I have **not** found its cause. Treat the browser suite as occasionally flaky |
+| `PW_CHANNEL=chrome npx playwright test --headed` (installed Chrome) | 51 passed |
+| `npm audit` | 0 vulnerabilities |
+| Mutation checks on the live-editing code | Skipping merged-content validation (25 tests failed), not saving merges (28), echoing remote updates back (9), never sending local changes (20): all caught. Dropping the write-permission check for sync: **not caught, and cannot be**, because the only share role can both read and write (an equivalent change). Allowing an empty shared document: **not caught at first**, a real test gap; I added two tests, and they fail under that change and pass on the real code |
+
+### Reconciliation with `Agents.md` section 8
+
+| # | Requirement | Result |
+|---|---|---|
+| 1 | Full automated suite | Run, passing (above) |
+| 2 | Lint, type check, production build | Run, passing (above) |
+| 3 | Create, rename, edit, save, reopen, persistence after refresh or restart | Verified by unit, API and browser tests, including closing and reopening a file database. **Not done:** manually stopping and restarting `npm run dev` |
+| 4 | Supported imports and unsupported-file errors | Verified (`import.*` tests, `import.spec.ts`) |
+| 5 | Rich text and structure survive reload | Verified (`formatting.spec.ts`, `paste.spec.ts`, round-trip tests) |
+| 6 | Ownership, sharing, revocation, access restrictions with different seeded users | Verified (`sharing.*` tests, `sharing.spec.ts`, `collaboration.spec.ts`) |
+| 7 | Set up without paid services | **Partly verified.** Every dependency is free and open source and nothing contacts an external service when the app runs. I did not repeat a clean-machine install, and did not run the tests with the network off. `npm install` and the one-time `npx playwright install chromium` need the network |
+| 8 | Every functional requirement reconciled with tests | Done: the table in `Testing-guide.md` (FR-1 to FR-5, SEC, NFR) |
+| 9 | All six required documents current | Done in this stage (see `Changelog.md`) |
+| 10 | Report defects, gaps, results, commands, setup, remaining work | This section, plus "Known limitations" and "Next steps" below |
+
+### Requirement coverage (from `Requirements.md`)
+
+| Requirement | Status |
+|---|---|
+| 1. Create, rename, edit in the browser, save and reopen; bold, italic, underline, headings, bulleted and numbered lists | Implemented and tested |
+| 2. File upload that becomes an editable document; limit stated in UI and README | `.txt` and `.md` only, implemented and tested; the limit is stated in the UI and README. `.docx` not implemented |
+| 3. Owner, a way to grant access, visible owned-versus-shared distinction | Implemented and tested (owner can grant and revoke an editor role) |
+| 4. Persistence of documents and sharing; formatting preserved; sharing behaviour demonstrable | Implemented and tested (SQLite) |
+| Deliverables: source code, README with setup, short architecture note, AI workflow note | Source, `README.md`, `Local-setup.md` and `Architecture.md` exist. **An AI workflow note does not exist**: the brief asks for one and it was not written. `deployment_guide.md` was added |
+
+### Phases 6 and 7: what was and was not covered
+
+Both phases were **skipped by owner decision because of the time constraint**. They were not done as phases; this records what the other phases happen to cover.
+
+| Phase 6 item | Evidence |
+|---|---|
+| Failed saves give an understandable error without silently losing data | Covered at the browser level: `DocSync.test.ts`, `DocumentEditor.test.tsx`, and the offline test in `collaboration.spec.ts` (text kept, retried, saved when the network returns). **Not covered:** a failing database write on the server (disk full, locked database); only a generic unexpected-failure test exists (`documents.api.test.ts`, 500 with no details leaked) |
+| Invalid titles and inputs rejected | Covered (`documents.service.test.ts`, `contentSchema.test.ts`, `sync.service.test.ts`, import tests) |
+| Missing documents handled safely | Covered (404 and 400 tests in service, API and UI) |
+| Unsupported uploads rejected | Covered (`import.file.test.ts`, `import.api.test.ts`, `import.spec.ts`) |
+| Unauthorized reads and writes rejected | Covered (`policy`, `sharing.*`, `sync.*` tests, `sharing.spec.ts`) |
+| Existing tests continue to pass | Yes (above) |
+| **Open:** a review of error handling across all routes, and failure-injection tests for database errors | Not done |
+
+| Phase 7 item | Evidence |
+|---|---|
+| User A creates, formats, saves, verifies persistence after refresh | `documents.spec.ts`, `formatting.spec.ts` |
+| Imports a supported file | `import.spec.ts` |
+| Shares with User B; B opens it | `sharing.spec.ts`, `collaboration.spec.ts` |
+| B cannot access unshared documents | `sharing.spec.ts` (Carol) |
+| A revokes and access is denied | `sharing.spec.ts`, `collaboration.spec.ts` |
+| Complete suite run | Yes (above) |
+| **Open:** one continuous end-to-end scenario following exactly the Plan.md steps; a usability and navigation review; keyboard-only and screen-reader checks; narrow and mobile layouts | Not done |
+
+### Defects and risks known at hand-off
+
+- One unexplained intermittent failure in the browser suite (above).
+- No database-failure handling tests (Phase 6 gap).
+- No AI workflow note (a stated deliverable).
+- The session cookie has no `Secure` flag and sign-in is simulated (documented); not suitable for real data.
+- Live editing polls every 2 seconds, has no cursors or presence, and its stored history grows without compaction; not load-tested.
+- Node 26.8.2 and Windows are the only tested environment. Deployment to Vercel and Render is **untested** (`deployment_guide.md`); the free Render plan loses all data on restart.
+- The backend does not serve the built frontend, so a single-service deployment needs a code change that has not been made.
+- The interface follows the mockups in `UI/` by inspection only (not pixel-compared); some mockup features were deliberately not built.
+- Upgrading a database file created in earlier phases was tested only from fresh databases.
+
+## Added after Phase 5: live editing and the visual design (2026-10-25 16:20 PDT (UTC-07:00))
+
+These were requested by the owner on top of the eight phases. Phase statuses above are unchanged.
+
+| Command | Result |
+|---|---|
+| `npm run verify` (typecheck, lint, test, build) | Exit 0. Vitest: 27 files, 488 tests passed, 0 failed, 0 skipped (server 350, client 138). Build succeeded |
+| `npm run test:e2e` (Chromium) | 51 passed, 0 failed on the final run (includes 12 new collaboration tests and the sharing tests updated for autosave) |
+| `npm audit` | 0 vulnerabilities |
+
+What was built: autosave and character-level merging of simultaneous edits (Yjs over HTTP polling), a sync endpoint with server-side validation of merged content, migration 003, a shared editor schema, a sync engine in the browser, status messages for saving, retrying and lost access, and the visual design from the mockups.
+
+Problems found and fixed while doing it:
+- `npm run dev` broke when I added a Node flag before `watch` in the script (tsx treated `watch` as a file name). Fixed by putting the flag after `watch`; verified the server starts without warnings.
+- A new E2E test selected text with a word-wise shortcut that did not select what I expected; the test, not the app, was wrong (the behaviour is covered by server and integration tests). It now selects characters explicitly and passes.
+- Existing E2E tests assumed the transient "Unsaved changes" state and a manual Save; with autosave they were changed (autosave is asserted instead; the revoked-editor test now blocks the network so the editor's text is genuinely unsaved when access is removed). Their intent is unchanged.
+- Yjs prints a Node `localStorage` experimental warning; silenced with `--no-experimental-webstorage` in the dev scripts and the test config.
+
+**Not verified (please read):**
+- I did **not** run mutation checks (break the code, confirm tests fail) for the live-editing code, as I did for earlier phases. The tests passed, but I have not shown that they would catch every kind of breakage.
+- The headed Google Chrome run was not repeated after these changes.
+- No load or long-session testing: the Yjs history only grows, the server rebuilds the document on every sync call, and polling is every 2 s per open editor.
+- Two users can still edit the same text only as fast as polling (about 2 s); there is no live cursor or presence indicator.
+- The interface was checked by looking at screenshots of sign-in, documents, editor and sharing, not pixel-compared. Mockup features that the product does not have were not built (search, outline, view-only role, drag-and-drop import dialog with progress, undo toast, fourth user). Narrow and mobile layouts were not tested.
+- An existing `data/app.db` created before migration 003 should upgrade automatically; I only tested upgrades from fresh databases.
 
 ## Phase 5 verification (commands actually run, 2026-10-25 15:55 PDT (UTC-07:00))
 
@@ -107,6 +211,7 @@ Notes and issues found:
 
 ## Completed
 
+- **After Phase 5 (owner request):** autosave, simultaneous-edit merging (Yjs), sync endpoint, collaboration tests, and the visual design.
 - **Phase 5:** signed-cookie simulated sign-in with user switcher, migration 002, share and revoke (owner only), editor access, owned versus shared lists, policy tests, session tests, sharing service, API, component and two-user browser tests.
 - **Phase 4:** `.txt` and `.md` import (raw-body upload endpoint, strict validation, text and Markdown converters, titles from file names), Import button with client pre-checks and supported types shown in the UI and README, error handling for unsupported, empty, binary, non-UTF-8, oversized and over-complex files, unit, API, component and browser tests.
 - **Phase 3:** Tiptap editor with a formatting toolbar (bold, italic, underline, H1-H3, bulleted and numbered lists); narrowed editor schema; allowlist content validation on the server; editor/validator contract tests; formatting E2E tests.
@@ -122,7 +227,7 @@ Notes and issues found:
 - Import: `.txt` and `.md` only, UTF-8 only, 512 KB maximum, creates a new document (no import into an existing one). Markdown links, images, code, quotes, tables and strike-through lose their formatting (text kept). `.docx` is deferred.
 - Formatting is limited to the required set; no links, images, tables, alignment, fonts, colours, undo UI buttons (Ctrl+Z works), or strike-through.
 - Sign-in is simulated: anyone who can open the app can choose any seeded user (no passwords), sessions never expire, no `Secure` flag, no CSRF token (SameSite=Lax only). Never production authentication.
-- Two users editing the same document at once: the last save wins; there is no merge, conflict warning or live update, and a revoked editor only finds out when their next save is refused.
+- Live editing is by polling (about 2 s), has no live cursors or presence, and the shared edit history grows without compaction. A removed editor finds out on their next sync (within about 2 s).
 - Only one share role (editor) exists; there is no read-only role, no sharing by email, no link sharing, and no way to transfer ownership.
 - A non-owner gets 403 rather than 404 for an existing document, which reveals that the id exists.
 - No autosave and no unsaved-changes warning when navigating away (Save is explicit).
@@ -132,4 +237,4 @@ Notes and issues found:
 
 ## Next steps
 
-Awaiting owner approval to start Phase 6: review validation and error handling across all features, add failure-injection tests (failed database writes must not lose data or report success), fill remaining test gaps, and re-run everything. Estimated 2-3 hours.
+Remaining work, in the order I would do it (about 4-6 hours in total, my estimate): (1) database-failure injection tests and an error-handling review across routes (2-3 hours); (2) one continuous two-user end-to-end test and a usability pass (1-2 hours); (3) the AI workflow note the brief asks for (under 1 hour); (4) find the cause of the one intermittent browser failure; (5) serve the built frontend from the backend and add the cookie `Secure` flag for deployment (about 1 hour, see `deployment_guide.md`).

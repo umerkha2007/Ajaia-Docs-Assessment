@@ -114,6 +114,8 @@ Automated tests must be written alongside implementation from Phase 1 onward. Ev
 
 ### Phase 6: Error Handling and Test Completion
 
+> **Skipped (time constraint)** by owner decision on 2026-10-25. Not done as a dedicated phase; see `Roadmap.md` for which of the items below are nevertheless covered by tests from other phases and which remain open.
+
 **Focus**
 - Review validation and error handling across all implemented features.
 - Handle persistence failures, invalid operations, and missing records.
@@ -130,6 +132,8 @@ Automated tests must be written alongside implementation from Phase 1 onward. Ev
 **Exit gate:** Core failure scenarios are handled, and no known critical test failures remain.
 
 ### Phase 7: Integration and Usability
+
+> **Skipped (time constraint)** by owner decision on 2026-10-25. Not done as a dedicated phase; see `Roadmap.md` for which of the items below are nevertheless covered by tests from other phases and which remain open.
 
 **Focus**
 - Validate the complete workflow across two seeded users.
@@ -157,20 +161,20 @@ Automated tests must be written alongside implementation from Phase 1 onward. Ev
 - Record outstanding work and limitations.
 
 **Required documentation**
-- [ ] `Agents.md`: agent implementation and verification rules.
-- [ ] `Architecture.md`: actual architecture and technical decisions.
-- [ ] `Changelog.md`: every changed file, timestamp with timezone, reason, and change description.
-- [ ] `Local-setup.md`: prerequisites, installation, initialization, seeded accounts, run commands, and troubleshooting.
-- [ ] `Testing-guide.md`: test commands, test organization, requirement-to-test mapping, and manual verification.
-- [ ] `Roadmap.md`: phase status, completed work, outstanding requirements, blockers, and next steps.
+- [x] `Agents.md`: agent implementation and verification rules.
+- [x] `Architecture.md`: actual architecture and technical decisions.
+- [x] `Changelog.md`: every changed file, timestamp with timezone, reason, and change description.
+- [x] `Local-setup.md`: prerequisites, installation, initialization, seeded accounts, run commands, and troubleshooting.
+- [x] `Testing-guide.md`: test commands, test organization, requirement-to-test mapping, and manual verification.
+- [x] `Roadmap.md`: phase status, completed work, outstanding requirements, blockers, and next steps.
 
 **Final acceptance criteria**
-- [ ] All mandatory functional requirements have been checked against their acceptance criteria.
-- [ ] Test results are based on commands actually executed.
-- [ ] Failed, skipped, and unexecuted tests are reported honestly.
-- [ ] Known defects and incomplete requirements are documented.
-- [ ] Local setup works without paid services.
-- [ ] Any remaining work includes a practical next step and an estimate of 2–4 additional hours where appropriate.
+- [x] All mandatory functional requirements have been checked against their acceptance criteria.
+- [x] Test results are based on commands actually executed.
+- [x] Failed, skipped, and unexecuted tests are reported honestly.
+- [x] Known defects and incomplete requirements are documented.
+- [ ] Local setup works without paid services. (Not ticked: every dependency is free and open source and nothing calls an external service at run time, but a clean-machine install was not repeated, and tests were not run with the network disabled.)
+- [x] Any remaining work includes a practical next step and an estimate of 2–4 additional hours where appropriate.
 
 **Exit gate:** The final handoff accurately describes what works, what has been verified, and what remains incomplete.
 
@@ -185,11 +189,11 @@ Update this table as implementation progresses. Do not mark a phase complete unt
 | 3. Rich-text editor | Complete (pending owner review) | 2026-10-25: `npm run verify` exit 0 (152 Vitest tests pass), `npm run test:e2e` 12 pass, also in headed Chrome. Details in `Roadmap.md` |
 | 4. File upload | Complete (pending owner review) | 2026-10-25: `npm run verify` exit 0 (267 Vitest tests pass), `npm run test:e2e` 28 pass, also in headed Chrome. Details in `Roadmap.md` |
 | 5. Seeded users and sharing | Complete (pending owner review) | 2026-10-25: `npm run verify` exit 0 (387 Vitest tests pass), `npm run test:e2e` 39 pass, also in headed Chrome. Details in `Roadmap.md` |
-| 6. Error handling and test completion | Not started | |
-| 7. Integration and usability | Not started | |
-| 8. Documentation and final verification | Not started | |
+| 6. Error handling and test completion | Skipped (time constraint) | Owner decision, 2026-10-25. Most of its listed tests exist from earlier phases; database-failure injection and a global error review were not done. See `Roadmap.md` |
+| 7. Integration and usability | Skipped (time constraint) | Owner decision, 2026-10-25. The two-user steps are covered by separate browser tests, but there is no single end-to-end scenario and no usability review. See `Roadmap.md` |
+| 8. Documentation and final verification | Complete (with documented gaps) | 2026-10-25 16:45 PDT: 490 Vitest tests, 51 Playwright tests, typecheck, lint, build all run; six docs current; gaps listed in `Roadmap.md` |
 
-Use only these statuses: `Not started`, `In progress`, `Blocked`, and `Complete`.
+Use only these statuses: `Not started`, `In progress`, `Blocked`, `Complete`, and (added by the owner on 2026-10-25 for Phases 6 and 7) `Skipped (time constraint)`.
 
 ## 5. Scope Boundaries
 
@@ -202,6 +206,8 @@ Use only these statuses: `Not started`, `In progress`, `Blocked`, and `Complete`
 - Automated tests, validation, error handling, and all required documentation.
 
 ### Deferred until core requirements pass
+
+> Update (2026-10-25): real-time collaboration was brought forward at the owner's request after last-save-wins lost data. It is implemented as automatic saving plus merge-by-edit syncing over HTTP polling (see `Architecture.md`, "Live editing"). It is additional to the eight phases and does not change their status.
 - Real email/password authentication.
 - Real-time collaboration.
 - Comments and suggestions.

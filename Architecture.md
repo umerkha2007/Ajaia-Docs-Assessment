@@ -1,6 +1,6 @@
 # Architecture
 
-Status: describes what exists after **Phase 5**. Sections marked *(planned)* are designed but not implemented and are not claimed to work.
+Status: describes what exists after **Phase 5, live editing and the UI design pass**. Sections marked *(planned)* are designed but not implemented and are not claimed to work.
 
 ## Stack
 
@@ -53,7 +53,7 @@ In development Vite serves the client on `127.0.0.1:5173` and proxies `/api` to 
 | `users` | `id` (PK, text), `name`, `email` (unique) |
 | `document_shares` | `document_id` (FK to `documents`, ON DELETE CASCADE), `user_id` (FK to `users`), `role` (CHECK in (`editor`)), `created_at`; primary key (`document_id`, `user_id`); index on `user_id` |
 | `app_settings` | `key` (PK), `value`. Holds `session_secret`, the random key that signs session cookies |
-| `documents` | `id` (PK, UUID v4), `owner_id` (NOT NULL, FK to `users`), `title`, `content` (JSON text), `created_at`, `updated_at` (ISO-8601 UTC) |
+| `documents` | `id` (PK, UUID v4), `ydoc` (BLOB, Yjs state, NULL until first opened for editing; migration 003), `owner_id` (NOT NULL, FK to `users`), `title`, `content` (JSON text), `created_at`, `updated_at` (ISO-8601 UTC) |
 
 Index `idx_documents_owner_updated (owner_id, updated_at DESC)`. Migration 002 added `document_shares` and `app_settings`. Schema changes go through `db/migrations.ts` (append-only, each applied in a transaction, recorded in `schema_migrations`).
 
@@ -70,7 +70,7 @@ Seeded users (`db/seed.ts`, idempotent `INSERT OR IGNORE`, run at startup): `use
 - `updated_at` changes on rename and on content save. Listing is ordered by `updated_at DESC, created_at DESC, id`.
 - The list endpoint returns summaries without content.
 - Default database file `data/app.db` (override with `DB_PATH`), WAL mode. Tests use `:memory:` or temp directories; E2E uses a temp-directory file and its own ports (5273/3101).
-- Save is explicit (button). The editor stays uncontrolled after mount and `getJSON()` is read at save time. If a save fails the typed content stays in the editor.
+- Content is saved automatically (see "Live editing" below); the Save button just syncs immediately.
 - Toolbar buttons prevent focus loss on mouse-down; otherwise the first keystrokes typed right after a click were dropped while focus was restored.
 
 ## HTTP API
@@ -92,6 +92,7 @@ All `/api/documents*` routes require the simulated user header. Errors are `{ "e
 | `GET /api/documents/:id/shares` | `{shares}`: who has access (name, email, role, when). Owner only |
 | `POST /api/documents/:id/shares` `{userId}` | Grant editor access; returns `{shares}`. Owner only. A client-sent `role` or owner is ignored. Sharing again with the same user changes nothing. 400 for yourself or an unknown user |
 | `DELETE /api/documents/:id/shares/:userId` | Revoke; returns `{shares}`. Owner only. 404 if that user has no access |
+| `POST /api/documents/:id/sync` `{stateVector?, update?}` | Live editing round trip (see "Live editing"). Read access to fetch, write access to send changes |
 | `POST /api/documents/import?filename=<name>` | 201 `{document}`. The request body is the raw file bytes (`Content-Type: application/octet-stream`, at most 512 KB). Creates a new document owned by the acting user |
 
 Error codes: `UNSUPPORTED_FILE` 415, `FILE_TOO_LARGE` 413 and `INVALID_FILE` 400 (import), `VALIDATION_ERROR` 400 (bad title, id, content, or body shape), `BAD_REQUEST` 400 (malformed JSON, from the framework), `UNAUTHENTICATED` 401, `FORBIDDEN` 403, `NOT_FOUND` 404, `INTERNAL_ERROR` 500 (generic message; details go to the server log only). A document that exists but is not yours returns 403, which reveals that the id exists; this was accepted for clearer UX in a simulated-user app.
@@ -120,6 +121,25 @@ What this is **not**: there are no passwords, so anyone who can open the app can
 - Deleting a document cascades to its shares. Sharing does not change `updated_at`.
 - Non-owners with no access get 403 (not 404) for an existing document, which reveals that the id exists. This was accepted for clearer errors in a simulated-user app.
 - Hiding controls in the UI (no Delete for shared documents, no Sharing panel for editors) is a convenience; each action is checked again by the server.
+
+## Live editing (autosave and sync)
+
+Added after Phase 5 because "last save wins" lost one user's work when two people edited at once. Plan.md had deferred real-time collaboration; it was brought forward at the owner's request.
+
+- **Technique:** a CRDT (Yjs). Every browser edits its own copy of the document; edits are small operations that can be merged in any order and repeated safely, so concurrent edits (even in the same paragraph) combine instead of overwriting. Tiptap's collaboration extension binds the editor to the Yjs document, so remote edits appear without moving your cursor and undo only reverts your own changes.
+- **Transport:** plain HTTP, no websockets. `POST /api/documents/:id/sync` carries `{stateVector, update?}` (base64) and returns `{update, stateVector, title, updatedAt}`: the browser sends what the server has not confirmed and receives what it is missing. The browser (`client/src/sync/DocSync.ts`) syncs 0.8 s after the last keystroke, and polls every 2 s (which also sends any unsaved changes, so continuous typing is never unsaved for long). A failed request is simply retried because what is sent is always "everything not yet confirmed". On leaving the page unsaved changes are flushed, and closing the tab with unsaved changes asks for confirmation.
+- **Storage:** `documents.ydoc` (migration 003) holds the Yjs state (the merge history). `documents.content` stays the readable JSON copy and is updated on every change, so listing, import, the plain content API and all earlier features are unchanged. A document that has never been opened for editing has `ydoc = NULL`; the first sync builds it from the JSON once and stores it, so concurrent first opens share one history. A shared document always contains at least one block, otherwise each browser would add its own empty paragraph.
+- **Validation (server-side):** after applying an update the server converts the Yjs document to JSON, passes it through the editor schema (`nodeFromJSON().check().toJSON()`, which also normalises it) and then the same content allowlist as every save. If the result is not something the editor could produce (disallowed nodes or marks, bad heading level, too large), the update is refused with 400 and nothing is stored. The editor schema lives in `shared/editorExtensions.ts` and is used by both browser and server, so they cannot drift.
+- **Permissions:** each sync checks access afresh: read access to fetch, write access to send changes. A removed editor's next sync gets 403; their page then shows the error, locks the editor and keeps their text visible. Saving content through `PUT /content` while a document has a Yjs state replaces the shared document (connected browsers converge on it).
+- **Not implemented:** live cursors or presence, instant push, per-user change history, compaction of the Yjs history (it only grows), conflict markers (merging is automatic). A rename by someone else shows up in the title field unless you are typing in it.
+
+## User interface
+
+The look follows the mockups in `/UI` (reference designs, not shipped code): Inter and Newsreader typography with system fallbacks (fonts are not downloaded so the app works offline), warm paper background, one blue accent, avatar initials per user, a split-screen "choose a user" page, a top bar with the user switcher, document rows and cards, a paper-style editor with a toolbar, and a sharing panel. Styling is one stylesheet (`client/src/index.css`) plus a small `Avatar` component; labels, roles and test ids are unchanged. Parts of the mockups that the product does not do were deliberately not built: search, outline sidebar, a "can view" role, a drag-and-drop import dialog with progress, an undo toast, a fourth user, and "last used" hints.
+
+## Deployment
+
+The backend is a long-running Node process with a SQLite file, so it needs a host with a persistent disk; the built frontend is static files. `deployment_guide.md` covers Vercel plus Render (with the rewrite that keeps the session cookie first-party) and the alternatives. Not yet implemented for deployment: serving `dist/client` from the backend, and the `Secure` cookie flag.
 
 ## Error handling
 

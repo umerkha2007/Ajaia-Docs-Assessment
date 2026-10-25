@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState, type ChangeEvent } from 'react';
 import { createDocument, deleteDocument, importDocument, listDocuments, type OwnedSummary, type SharedSummary } from './api';
+import { Avatar } from './Avatar';
 import { checkImportFile, IMPORT_ACCEPT, IMPORT_HELP } from './importRules';
 
 export function DocumentList() {
@@ -71,7 +72,7 @@ export function DocumentList() {
     <section aria-labelledby="your-docs">
       <div className="row">
         <h2 id="your-docs">Your documents</h2>
-        <button type="button" onClick={onCreate} disabled={busy}>
+        <button type="button" className="primary" onClick={onCreate} disabled={busy}>
           New document
         </button>
         <button type="button" onClick={() => fileInput.current?.click()} disabled={busy}>
@@ -122,6 +123,7 @@ export function DocumentList() {
         <ul className="doc-list" aria-label="Documents shared with you">
           {shared.map((d) => (
             <li key={d.id}>
+              <Avatar id={d.ownerId} name={d.ownerName} size={28} />
               <a href={`#/docs/${d.id}`}>{d.title}</a>
               <span className="muted">Owner: {d.ownerName}</span>
               <span className="badge">Can edit</span>

@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Ajaia Docs — Import</title>
+<script src="./vendor/react.js"></script>
+<script src="./vendor/react-dom.js"></script>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=Newsreader:opsz,wght@6..72,500&amp;display=swap">
+<style>
+body{margin:0}
+a{color:#1D3BC4}a:hover{color:#16181D}
+</style>
+</helmet>
+<div style="min-height: 960px; position: relative; background: #F6F6F3; font-family: Inter, system-ui, sans-serif; color: #16181D; overflow: hidden">
+
+<div aria-hidden="true" style="position: absolute; inset: 0; display: flex">
+<div style="width: 248px; background: #FFFFFF; border-right: 1px solid #E7E6E1"></div>
+<div style="flex: 1; padding: 56px 64px; display: flex; flex-direction: column; gap: 14px">
+<div style="height: 36px; width: 360px; max-width: 80%; background: #E7E6E1; border-radius: 6px"></div>
+<div style="height: 260px; background: #FFFFFF; border: 1px solid #E7E6E1; border-radius: 14px; margin-top: 24px"></div>
+</div>
+</div>
+<div aria-hidden="true" style="position: absolute; inset: 0; background: rgba(22,24,29,0.42)"></div>
+
+<div style="position: relative; min-height: 960px; display: flex; align-items: flex-start; justify-content: center; padding: 80px 16px 48px; box-sizing: border-box">
+<section role="dialog" aria-modal="true" aria-labelledby="imp-h" style="width: 100%; max-width: 600px; background: #FFFFFF; border-radius: 18px; box-shadow: 0 24px 64px rgba(22,24,29,0.28); overflow: hidden">
+
+<div style="padding: 24px 24px 0; display: flex; align-items: flex-start; justify-content: space-between; gap: 16px">
+<div style="display: flex; flex-direction: column; gap: 4px">
+<h2 id="imp-h" style="margin: 0; font-family: Newsreader, Georgia, serif; font-weight: 500; font-size: 28px; letter-spacing: -0.015em">Import a document</h2>
+<p style="margin: 0; font-size: 14px; color: #5B6170">Each file becomes a new editable document that you own.</p>
+</div>
+<a href="Main.dc.html" aria-label="Close" style="width: 40px; height: 40px; flex: none; border-radius: 10px; display: flex; align-items: center; justify-content: center; color: #3A3F4B"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"></path></svg></a>
+</div>
+
+<div style="padding: 20px 24px 0">
+<label style="display: flex; flex-direction: column; align-items: center; gap: 14px; padding: 36px 24px; border: 1.5px dashed {{accent}}; border-radius: 14px; background: #F4F6FE; text-align: center; cursor: pointer">
+<span style="width: 52px; height: 52px; border-radius: 14px; background: #FFFFFF; box-shadow: 0 2px 8px rgba(43,76,224,0.15); display: flex; align-items: center; justify-content: center"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="{{accent}}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 16V4M7 9l5-5 5 5"></path><path d="M4 16v3a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-3"></path></svg></span>
+<span style="font-size: 16px; font-weight: 600">Drop a file here, or <span style="color: #1D3BC4; text-decoration: underline; text-underline-offset: 3px">browse</span></span>
+<span style="display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; font-size: 13px; color: #3A3F4B">Supported:
+<span style="font-family: ui-monospace, Menlo, monospace; font-size: 12px; font-weight: 600; background: #FFFFFF; border: 1px solid #DCE1F8; border-radius: 6px; padding: 2px 8px">.txt</span>
+<span style="font-family: ui-monospace, Menlo, monospace; font-size: 12px; font-weight: 600; background: #FFFFFF; border: 1px solid #DCE1F8; border-radius: 6px; padding: 2px 8px">.md</span>
+</span>
+<input type="file" accept=".txt,.md,text/plain,text/markdown" style="position: absolute; width: 1px; height: 1px; opacity: 0">
+</label>
+</div>
+
+<div style="padding: 20px 24px 0; display: flex; flex-direction: column; gap: 10px">
+<h3 style="margin: 0; font-size: 13px; font-weight: 600">This session</h3>
+
+<div style="display: flex; align-items: center; gap: 12px; padding: 12px 14px; border: 1px solid #E7E6E1; border-radius: 12px">
+<span style="width: 36px; height: 36px; flex: none; border-radius: 9px; background: #E7F5EE; display: flex; align-items: center; justify-content: center"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#1F7A50" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12 5 5 9-10"></path></svg></span>
+<span style="flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px"><span style="font-size: 14px; font-weight: 600">interview-notes.md</span><span style="font-size: 12px; color: #3A3F4B">Imported · 3 headings, 2 lists kept · sanitized</span></span>
+<a href="Editor.dc.html" style="height: 36px; padding: 0 12px; border-radius: 8px; border: 1px solid #E1E0DA; color: #16181D; font-size: 13px; font-weight: 600; display: flex; align-items: center">Open</a>
+</div>
+
+<div style="display: flex; flex-direction: column; gap: 8px; padding: 12px 14px; border: 1px solid #E7E6E1; border-radius: 12px">
+<div style="display: flex; align-items: center; gap: 12px">
+<span style="width: 36px; height: 36px; flex: none; border-radius: 9px; background: #F3F3F0; display: flex; align-items: center; justify-content: center"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#3A3F4B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 3H6a1 1 0 0 0-1 1v16a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V8z"></path><path d="M14 3v5h5"></path></svg></span>
+<span style="flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px"><span style="font-size: 14px; font-weight: 600">meeting-minutes.txt</span><span style="font-size: 12px; color: #3A3F4B">Reading and sanitizing…</span></span>
+<span style="font-size: 12px; font-weight: 600; color: #3A3F4B">64%</span>
+</div>
+<div role="progressbar" aria-valuenow="64" aria-valuemin="0" aria-valuemax="100" aria-label="Import progress" style="height: 4px; background: #EEEDE8; border-radius: 999px; overflow: hidden"><div style="width: 64%; height: 100%; background: {{accent}}; border-radius: 999px"></div></div>
+</div>
+
+<div role="alert" style="display: flex; align-items: flex-start; gap: 12px; padding: 12px 14px; border: 1px solid #F4C7C3; background: #FEF4F3; border-radius: 12px">
+<span style="width: 36px; height: 36px; flex: none; border-radius: 9px; background: #FCE1DE; display: flex; align-items: center; justify-content: center"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#B42318" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M12 7.5v5.5M12 16.5v.01"></path></svg></span>
+<span style="flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px"><span style="font-size: 14px; font-weight: 600">roadmap.pdf</span><span style="font-size: 13px; color: #8F1D14; line-height: 1.45">Unsupported file type. Only .txt and .md files can be imported.</span></span>
+<button type="button" aria-label="Dismiss roadmap.pdf error" style="width: 36px; height: 36px; flex: none; border: 0; border-radius: 8px; background: transparent; color: #8F1D14; display: flex; align-items: center; justify-content: center"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"></path></svg></button>
+</div>
+
+<div role="alert" style="display: flex; align-items: flex-start; gap: 12px; padding: 12px 14px; border: 1px solid #F4C7C3; background: #FEF4F3; border-radius: 12px">
+<span style="width: 36px; height: 36px; flex: none; border-radius: 9px; background: #FCE1DE; display: flex; align-items: center; justify-content: center"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#B42318" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M12 7.5v5.5M12 16.5v.01"></path></svg></span>
+<span style="flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px"><span style="font-size: 14px; font-weight: 600">draft.md</span><span style="font-size: 13px; color: #8F1D14; line-height: 1.45">This file is empty. Add some text and try again.</span></span>
+<button type="button" style="height: 36px; padding: 0 12px; flex: none; border: 1px solid #F0B4AE; border-radius: 8px; background: #FFFFFF; color: #8F1D14; font: 600 13px Inter, sans-serif">Choose another</button>
+</div>
+
+<div role="alert" style="display: flex; align-items: flex-start; gap: 12px; padding: 12px 14px; border: 1px solid #F4C7C3; background: #FEF4F3; border-radius: 12px">
+<span style="width: 36px; height: 36px; flex: none; border-radius: 9px; background: #FCE1DE; display: flex; align-items: center; justify-content: center"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#B42318" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M12 7.5v5.5M12 16.5v.01"></path></svg></span>
+<span style="flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px"><span style="font-size: 14px; font-weight: 600">notes-export.txt</span><span style="font-size: 13px; color: #8F1D14; line-height: 1.45">We couldn’t read this file. It may not be valid UTF-8 text.</span></span>
+</div>
+</div>
+
+<div style="margin-top: 20px; padding: 16px 24px; border-top: 1px solid #EEEDE8; background: #FBFBF9; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px">
+<span style="display: flex; align-items: center; gap: 8px; font-size: 13px; color: #3A3F4B"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3 4 6v6c0 4.5 3.4 8 8 9 4.6-1 8-4.5 8-9V6z"></path></svg>HTML and scripts in imported files are removed.</span>
+<a href="Main.dc.html" style="height: 44px; padding: 0 18px; border-radius: 10px; background: #16181D; color: #FFFFFF; font-size: 14px; font-weight: 600; display: flex; align-items: center">Done</a>
+</div>
+</section>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"accent":{"editor":"color","default":"#2B4CE0","options":["#2B4CE0","#16181D","#0F766E"]},"$preview":{"width":1440,"height":960}}'>
+class Component extends DCLogic {
+renderVals() {
+return { accent: this.props.accent ?? '#2B4CE0' };
+}
+}
+</script>
+</body>
+</html>

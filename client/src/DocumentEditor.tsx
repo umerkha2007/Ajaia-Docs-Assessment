@@ -64,11 +64,11 @@ function EditorPane({
   return (
     <>
       <RichTextEditor ydoc={sync.ydoc} editable={editable} />
-      <div className="row">
+      <div className="row save-row">
         <button type="button" onClick={save} disabled={!sync.isReady || status.kind === 'saving'}>
           Save
         </button>
-        <span role="status" data-testid="save-status" className={status.kind === 'error' ? 'error' : 'muted'}>
+        <span role="status" data-testid="save-status" className={`save-status ${status.kind}`}>
           {describe(status)}
         </span>
       </div>
@@ -134,11 +134,11 @@ export function DocumentEditor({ id, syncOptions }: { id: string; syncOptions?: 
   }
 
   return (
-    <section>
+    <section className="doc-page">
       <p>
-        <a href="#/">← All documents</a>
+        <a href="#/" className="back-link">← All documents</a>
       </p>
-      <div className="row">
+      <div className="row title-row">
         <input
           aria-label="Document title"
           value={title}

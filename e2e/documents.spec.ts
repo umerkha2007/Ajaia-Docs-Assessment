@@ -35,7 +35,8 @@ test.describe('End-to-End: Document CRUD and persistence', () => {
     await rename(page, title);
 
     await typeInEditor(page, 'First line', 'Second line');
-    await expect(page.getByTestId('save-status')).toHaveText('Unsaved changes');
+    // Autosave: the change is saved by itself, without pressing Save.
+    await expect(page.getByTestId('save-status')).toHaveText('All changes saved', { timeout: 10_000 });
     await page.getByRole('button', { name: 'Save' }).click();
     await expect(page.getByTestId('save-status')).toHaveText('All changes saved');
 
