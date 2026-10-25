@@ -8,3 +8,4 @@ playwright-report/
 .env
 deployment_guide.md
 LLM_understanding.md
+UI/

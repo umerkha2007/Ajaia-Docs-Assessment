@@ -239,3 +239,17 @@ Phases 6 and 7 were skipped by owner decision (time constraint).
 | `Roadmap.md` | Modified | Final acceptance | Verdict, commands and results, section 8 reconciliation, requirement coverage, Phase 6 and 7 coverage tables, known defects, remaining work and estimate |
 | `Testing-guide.md` | Modified | Final mapping | Added the edge-case row and the two skipped-phase gap rows |
 | `README.md`, `Local-setup.md`, `Architecture.md` | Modified | Point to the deployment guide | Link and a short Deployment section |
+
+### 2026-10-25 (submission file)
+
+| File | Action | Reason | Description |
+|---|---|---|---|
+| `SUBMISSION.md` | Created | The assessment brief requires a file listing exactly what is included | Links, what is included, run and review steps, test accounts, results from commands actually run, scope decisions, known gaps, next steps, and a draft of the AI workflow facts. Lists the live URL, video link, Drive folder and standalone AI note as **not provided**, because they do not exist yet |
+
+### 2026-10-25 (AI workflow note)
+
+| File | Action | Reason | Description |
+|---|---|---|---|
+| `AIWorkflow.md` | Created | Owner supplied the AI workflow note as a Word file and asked for a Markdown version | Converted with a small script using only the Python standard library (no pandoc available): headings, bold and italic, numbered and nested lists, two tables, and 14 images. Wording was **not** edited (typos kept). Two things were changed mechanically: Word's auto-links such as `http://agents.md` were turned back into plain file names, and a block written with tab characters was turned into a table |
+| `AIWorkflow_images/` | Created | The note's 14 screenshots | Extracted from the Word file, unchanged, `image1.png` to `image14.png`; referenced from `AIWorkflow.md` in document order |
+| `SUBMISSION.md` | Modified | The AI workflow note now exists | Lists it as included, adds a warning about the stack mismatch in the note, renames the draft-facts section |
